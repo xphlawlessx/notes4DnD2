@@ -1,0 +1,35 @@
+{
+  "name": "Notes4DnD",
+  "version": "1.0.0",
+  "main": "app.js",
+  "author": "phalyce",
+  "description": "Dnd note taking app",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.50",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.50",
+    "electron": "^8.2.3"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "vue": "^2.6.11",
+    "vue-p5": "^0.8.3"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "Notes4DnD"
+          }
+        }
+      ]
+    }
+  }
+}
