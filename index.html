@@ -22,9 +22,7 @@
 </head>
 <body>
 <div id="app" @dragover.prevent @drop.prevent>
-    <div class="overlayL" v-show="showIcons" id="overlayL">
-        <left-overlay></left-overlay>
-    </div>
+    <left-overlay class="overlayL" v-show="showIcons"></left-overlay>
     <p v-show="showModal" @close="closeForm" id="modal" ref="modal" @keypress.esc="mouseRClick" class="overlayR">
         <note-overlay></note-overlay>
     </p>
