@@ -1,393 +1,44 @@
 <html>
 <head>
     <title>Notes</title>
-    <script src="note.js"></script>
-    <script src="icon.js"></script>
-    <script src="map.js"></script>
-    <script src="dungeon.js"></script>
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/vue-p5"></script>
+    <script src="notes/note.js"></script>
+    <script src="notes/icon.js"></script>
+    <script src="notes/map.js"></script>
+    <script src="notes/left-overlay.js"></script>
+    <script src="notes/note-overlay.js"></script>
+    <script src="notes/dungeon.js"></script>
     <link href="style.css" rel="stylesheet" type="text/css"/>
+
+    <script src="initiative/Dice.js"></script>
+    <script src="initiative/Character.js"></script>
+    <script src="initiative/InitTracker.js"></script>
+    <link rel="stylesheet" href="initiative/initiative.css">
+
+    <script src="soundboard/SoundBoard.js"></script>
+    <link rel="stylesheet" href="soundboard/soundboard.css">
 
 </head>
 <body>
-<link href="style.css" rel="stylesheet" type="text/css"/>
-<div id="app">
+<div id="app" @dragover.prevent @drop.prevent>
     <div class="overlayL" v-show="showIcons" id="overlayL">
-        <div class="dropdown">
-            <button class="dropbtn">Select Map</button>
-            <div id="mapListParent" class="dropdown-content">
-
-            </div>
-        </div>
-        <br>
-        <br>
-        <ul id="iconList" style="list-style-type:none">
-        </ul>
-        <br>
-        <input placeholder="Name map"
-               class="overlay-content"
-               style="height: 28px;width: 100px"
-               id="mapNameInput"
-               type="text"
-               v-model="mapName">
-        <input placeholder="Name dungeon"
-               class="overlay-content"
-               style="height: 28px;width: 100px"
-               id="dungeonNameInput"
-               type="text"
-               v-model="dungeonName">
-        <br>
+        <left-overlay></left-overlay>
     </div>
     <p v-show="showModal" @close="closeForm" id="modal" ref="modal" @keypress.esc="mouseRClick" class="overlayR">
-        <span class="overlay-content">
-            <label for="title">Title:</label>
-        <input id="title" type="text" name="title" v-model="nameLabelString">
-        <textarea placeholder="Describe the encounter." id="text" name="text"
-                  style="overflow-y: scroll; word-wrap: break-word; resize: none; font-size: 16px; height: 90%;width:140%"
-                  v-model="noteBodyString"></textarea>
-
-        </span>
+        <note-overlay></note-overlay>
     </p>
+    <button @click="showInit = !showInit">{{showInit?'Hide Init':'Show Init'}}</button>
+    <button @click="showSound = !showSound">{{showSound?'Hide Sound':'Show Sound'}}</button>
+    <button @click="showCanvas = !showCanvas">{{showCanvas?'Hide Canvas':'Show Canvas'}}</button>
+    <init-tracker v-show="showInit"></init-tracker>
     <span @click.right="mouseRClick" @click="mouseLClick">
-    <vue-p5 id="canvas" v-on="{setup, draw, mousedragged,keypressed, mousereleased, windowresized}"></vue-p5>
+    <vue-p5 id="canvas" v-show="showCanvas"
+            v-on="{setup, draw, mousedragged,keypressed, mousereleased, windowresized}"></vue-p5>
     </span>
-    <span @click.right="mouseRClick" @keypress.esc="mouseRClick">
-    </span>
+    <sound-board v-show="showSound" v-cloak @drop.prevent="$emit('sound-dropped',(e)=>e)"
+                 @dragover.prevent></sound-board>
 </div>
-<script>
-    const {ipcRenderer} = require('electron')
-
-    new Vue({
-        el: '#app',
-        data: {
-
-            sketch: null,
-            canvas: null,
-            bgImage: null,
-            roomIcons: [],
-            mapListParent: null,
-            nameLabelString: '',
-            noteBodyString: '',
-            overlayL: null,
-            overlayR: null,
-
-            showIcons: false,
-            showModal: false,
-            xOffset: 0.0,
-            yOffset: 0.0,
-            resizeOffset: 25,
-            selectedIcon: null,
-            baseWidth: 0,
-            baseHeight: 0,
-
-            dots: [],
-            maps: [],
-            mapName: '',
-            mapFile: '',
-            dungeonName: '',
-
-            selectedDot: Note,
-            overDot: false,
-            dragging: false,
-        },
-
-        methods: {
-            setup(sketch) {
-                this.sketch = sketch;
-                this.bgImage = sketch.loadImage('https://static.tumblr.com/maopbtg/a5emgtoju/inflicted.png');
-                this.bgImage.loadPixels();
-                this.ipcSetup();
-                this.loadIcons();
-                let c = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
-                this.baseWidth = sketch.windowWidth;
-                this.baseHeight = sketch.windowHeight;
-                sketch.textAlign(sketch.CENTER);
-                this.mapListParent = document.getElementById('mapListParent');
-                this.canvas = document.getElementById('canvas');
-                this.overlayL = document.getElementById("overlayL");
-                this.overlayR = document.getElementById("overlayR");
-                this.sketch.textSize(16);
-                c.drop(this.gotFile);
-                this.sketch.background(this.bgImage);
-                this.sketch.text('drop map image or json file', this.sketch.width / 2, this.sketch.height / 2);
-            },
-            loadIcons() {
-                let _query = document.querySelectorAll("img.iconButton");
-                _query.forEach((i) => {
-                    let _path = i.src.replace("file:///", "");
-                    let _name = _path.split('/')[_path.split('/').length - 1].replace('.png', '');
-                    this.roomIcons.push(new Icon(_name, this.sketch.loadImage(_path)));
-                })
-
-                for (let i = 0; i < _query.length; i++) {
-                    _query[i].addEventListener('click', () => {
-                        this.onClick(this.roomIcons[i].name);
-                    })
-                }
-
-            },
-            ipcSetup() {
-                ipcRenderer.on('button', (event, args) => {
-                    switch (args) {
-                        case 'new-map':
-                            this.clearMap();
-                            break;
-                        case 'new-dungeon':
-                            this.clearDungeon();
-                            break;
-                        case 'save-map':
-                            this.saveMap();
-                            break;
-                        case 'save-dungeon':
-                            this.saveDungeon();
-                            break;
-                    }
-                    //console.log(args)
-                })
-                ipcRenderer.on('icon-paths', (event, args) => {
-                    this.allIcons = args;
-                    this.setIconImages();
-                    this.loadIcons()
-                    this.selectedIcon = this.roomIcons[0];
-
-                });
-            },
-
-            onClick(id) {
-                let icon = this.roomIcons.filter(icon => icon.name === id)[0]
-                this.showIcons = false;
-                this.selectedIcon = this.roomIcons[this.roomIcons.indexOf(icon)];
-            },
-            openForm() {
-                this.updateDots(this.sketch);
-                this.showModal = true;
-                this.nameLabelString = this.selectedDot.name;
-                this.noteBodyString = this.selectedDot.body;
-            },
-            closeForm() {
-                this.selectedDot.name = this.nameLabelString;
-                this.selectedDot.body = this.noteBodyString;
-                this.selectedDot = null;
-                this.showModal = false;
-            },
-            windowresized(sketch) {
-                sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
-                let xScale = sketch.windowWidth / this.baseWidth;
-                let yScale = sketch.windowHeight / this.baseHeight;
-                for (const d of this.dots) {
-                    d.w *= xScale;
-                    d.h *= yScale;
-                    d.x *= xScale;
-                    d.y *= yScale;
-                }
-                this.baseWidth = sketch.windowWidth;
-                this.baseHeight = sketch.windowHeight;
-            },
-            draw(sketch) {
-                if (sketch.img) {
-                    sketch.image(sketch.img, 0, 0, sketch.windowWidth - this.resizeOffset, sketch.windowHeight - this.resizeOffset);
-                } else if (this.bgImage) {
-                    this.sketch.background(this.bgImage);
-                    this.sketch.text('drop map image or json file', this.sketch.width / 2, this.sketch.height / 2);
-                }
-                this.updateDots(sketch);
-                this.overlayL , this.overlayR = this.showIcons ? "30%" : "0%";
-
-            },
-            updateDots(sketch) {
-                if (!this.showModal) {
-                    this.overDot = false;
-                    for (const dot of this.dots) {
-                        if (
-                            sketch.mouseX > dot.x - dot.w &&
-                            sketch.mouseX < dot.x + dot.w &&
-                            sketch.mouseY > dot.y - dot.h &&
-                            sketch.mouseY < dot.y + dot.h
-                        ) {
-                            dot.isSelected = true;
-                            this.selectedDot = dot;
-                            this.overDot = true;
-                            this.canvas.focus();
-                        } else {
-                            dot.isSelected = false;
-                        }
-                        if (!this.overDot) {
-                            this.selectedDot = null;
-                        }
-                        dot.show(sketch);
-                    }
-                }
-            },
-            setIconImages() {
-                let ul = document.getElementById("iconList");
-                for (const icon of this.allIcons) {
-                    let li = document.createElement("li");
-                    let img = document.createElement("img");
-                    img.src = icon;
-                    img.className = 'iconButton';
-                    li.appendChild(img);
-                    ul.appendChild(li);
-                }
-                this.loadIcons();
-            },
-            mouseLClick() {
-                let sketch = this.sketch;
-                if (sketch.mouseButton === sketch.LEFT) {
-                    if (this.overDot) {
-                        this.dragging = true;
-                        this.xOffset = sketch.mouseX - this.selectedDot.x;
-                        this.yOffset = sketch.mouseY - this.selectedDot.y;
-                    } else {
-                        this.dragging = false;
-                        //console.log(this.selectedIcon)
-                        //console.log(this.roomIcons)
-                        this.dots.push(new Note("", "", sketch.mouseX, sketch.mouseY, this.selectedIcon.data, this.roomIcons.indexOf(this.selectedIcon)));
-                    }
-                }
-            },
-            mouseRClick() {
-                if (this.showModal) {
-                    this.closeForm();
-                    return;
-                }
-                if (this.overDot) {
-                    if (!this.showModal) {
-                        this.openForm();
-                    }
-                } else {
-                    this.showIcons = !this.showIcons;
-                }
-            },
-            mousedragged(sketch) {
-                if (this.overDot) {
-                    this.selectedDot.x = sketch.mouseX - this.xOffset;
-                    this.selectedDot.y = sketch.mouseY - this.yOffset;
-                }
-            },
-            mousereleased() {
-                this.dragging = false;
-            },
-            keypressed(sketch) {
-                this.updateDots(sketch);
-                if (!this.overDot || sketch.key !== 'Backspace' && sketch.key !== 'Delete' || this.showModal) {
-                    return;
-                }
-                let toDel = confirm("Really delete ?");
-                if (toDel) {
-                    this.dots.splice(this.dots.indexOf(this.selectedDot), 1);
-                }
-            },
-            gotFile(file) {
-                if (file.subtype === 'json') {
-                    this.loadDungeon(file)
-                } else {
-                    this.newMap(file)
-                }
-            },
-            clearMap() {
-                this.sketch.img = null;
-                this.mapData = null;
-                this.mapName = '';
-                this.dots = [];
-                this.sketch.background(0);
-
-                //console.log(this.mapName);
-            },
-            clearDungeon() {
-                this.sketch.img = null;
-                this.dots = [];
-                this.maps = []
-                this.mapName = '';
-                this.mapFile = '';
-                this.dungeonName = ''
-                this.mapData = '';
-                // this.sketch.background(this.bgImage);
-                // this.sketch.text('drop map image or json file', this.sketch.width / 2, this.sketch.height / 2);
-            },
-            newMap(file) {
-                this.sketch.img = this.sketch.createImg(file.data, '').hide();
-                this.mapData = file.data;
-            },
-            loadDungeon(file) {
-                let dungeon = this.sketch.loadJSON(file.file.path, () => {
-                    let maps = []
-                    for (const m of dungeon.maps) {
-                        maps.push(new MapWrapper(m.name, m.data, m.notes));
-                    }
-                    for (const m of maps) {
-                        this.addButton(m.name);
-                    }
-                    this.maps = [...maps];
-                    this.dungeonName = dungeon.name;
-                })
-            },
-            loadMap(index) {
-                this.mapName = this.maps[index].name;
-                this.sketch.img = this.sketch.createImg(this.maps[index].data, '').hide();
-                this.mapData = this.maps[index].data;
-                let dots = Object.values(this.maps[index].notes);
-                this.dots = [];
-                for (const dot of dots) {
-                    this.dots.push(new Note(dot.name, dot.body, dot.x, dot.y, this.roomIcons[dot.iconIndex], dot.iconIndex))
-                }
-            },
-            addButton(bName) {
-                let dropdownChild = document.createElement("a");
-                dropdownChild.innerText = bName;
-                let index = -1;
-                for (const m of this.maps) {
-                    if (m.name === bName) {
-                        index = this.maps.indexOf(m);
-                    }
-                }
-                if (index < 0) {
-                    return;
-                }
-                dropdownChild.addEventListener("click", function () {
-                    this.loadMap(index);
-                }.bind(this));
-                this.mapListParent.appendChild(dropdownChild);
-            },
-            saveMap() {
-                if (this.mapName.trim().length === 0) {
-                    alert("Name the map in the right click menu")
-                    return;
-                }
-                //check if map is in list..
-                let index = -1;
-                this.maps.forEach(map => {
-                    if (map.name === this.mapName) {
-                        index = this.maps.indexOf(map);
-                    }
-                });
-
-                const mapSave = new MapWrapper(this.mapName, this.mapData, [...this.dots])
-                if (index < 0) {
-                    //new map
-                    this.maps.push(mapSave);
-                    this.addButton(this.mapName);
-                } else {
-                    //overwrite
-                    let toOver = confirm(`This will overwrite ${this.maps[index].name}`);
-                    if (toOver) {
-                        this.maps.splice(index, 1, mapSave);
-                    }
-                }
-            },
-            saveDungeon() {
-                if (this.dungeonName.trim().length === 0) {
-                    alert("Name the Dungeon in the right click menu")
-                    return;
-                }
-                let dungeonSave = new Dungeon(this.dungeonName, this.maps)
-                ipcRenderer.send('dungeon', dungeonSave);
-            },
-
-        }
-    });
-
-
-</script>
+<script src="mainVue.js"></script>
 </body>
 </html>
