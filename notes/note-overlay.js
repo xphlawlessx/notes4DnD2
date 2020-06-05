@@ -1,4 +1,4 @@
-Vue.component('note-overlay', {
+export default {
     data: function () {
         return {
             nameLabelString: '',
@@ -6,7 +6,7 @@ Vue.component('note-overlay', {
         }
     },
     template:
-        `
+            `
         <span class="overlay-content">
             <label for="title" style="color: white">Title:</label>
         <input style="color: white" id="title" type="text" name="title" v-model="nameLabelString">
@@ -16,4 +16,4 @@ Vue.component('note-overlay', {
 
         </span>
     `,
-});
+}

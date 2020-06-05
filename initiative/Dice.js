@@ -1,4 +1,4 @@
-class Dice {
+export class Dice {
     static initiative(characters) {
         for (const character of characters) {
             let roll = 0
@@ -70,7 +70,7 @@ class Dice {
 
 }
 
-roll = function (rollSet) {
+export const roll = function (rollSet) {
     const {d20 = 0, d4 = 0, d6 = 0, d8 = 0, d10 = 0, d12 = 0, d100 = 0, bonus = 0} = rollSet
     let sum = 0;
     let display = ''
@@ -125,7 +125,7 @@ roll = function (rollSet) {
     return {name, sum, display};
 }
 
-class RollSet {
+export class RollSet {
     constructor(d20 = 0, d4 = 0, d6 = 0, d8 = 0, d10 = 0, d12 = 0, d100 = 0, bonus = 0) {
         this.d20 = d20
         this.d4 = d4

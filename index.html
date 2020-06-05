@@ -1,24 +1,11 @@
 <html>
 <head>
-    <title>Notes</title>
+    <title>DnD Suite</title>
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/vue-p5"></script>
-    <script src="notes/note.js"></script>
-    <script src="notes/icon.js"></script>
-    <script src="notes/map.js"></script>
-    <script src="notes/left-overlay.js"></script>
-    <script src="notes/note-overlay.js"></script>
-    <script src="notes/dungeon.js"></script>
-    <link href="style.css" rel="stylesheet" type="text/css"/>
-
-    <script src="initiative/Dice.js"></script>
-    <script src="initiative/Character.js"></script>
-    <script src="initiative/InitTracker.js"></script>
-    <link rel="stylesheet" href="initiative/initiative.css">
-
-    <script src="soundboard/SoundBoard.js"></script>
-    <link rel="stylesheet" href="soundboard/soundboard.css">
-
+    <link rel="stylesheet" href="style.css" type="text/css"/>
+    <link rel="stylesheet" href="initiative/initiative.css" type="text/css"/>
+    <link rel="stylesheet" href="soundboard/soundboard.css" type="text/css"/>
 </head>
 <body>
 <div id="app" @dragover.prevent @drop.prevent>
@@ -37,6 +24,6 @@
     <sound-board v-show="showSound" v-cloak @drop.prevent="$emit('sound-dropped',(e)=>e)"
                  @dragover.prevent></sound-board>
 </div>
-<script src="mainVue.js"></script>
+<script src="mainVue.js" type="module"></script>
 </body>
 </html>

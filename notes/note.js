@@ -1,4 +1,4 @@
-class Note {
+export class Note {
     constructor(name, body, x, y, img, iconIndex) {
         this.name = name;
         this.body = body;

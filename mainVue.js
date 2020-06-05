@@ -1,7 +1,21 @@
 const {ipcRenderer} = require('electron')
+import {default as init} from "./initiative/InitTracker.js";
+import {default as sound} from "./soundboard/SoundBoard.js";
+import {default as lOverlay} from "./notes/left-overlay.js";
+import {default as rOverlay} from "./notes/note-overlay.js";
+import {Note} from "./notes/note.js"
+import {Icon} from "./notes/icon.js"
+import {Dungeon} from "./notes/dungeon.js"
+import {MapWrapper} from "./notes/map.js"
 
 new Vue({
     el: '#app',
+    components: {
+        'init-tracker': init,
+        'sound-board': sound,
+        'left-overlay': lOverlay,
+        'note-overlay': rOverlay,
+    },
     data: {
 
         sketch: null,

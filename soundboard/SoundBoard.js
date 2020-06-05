@@ -1,4 +1,4 @@
-Vue.component('sound-board', {
+export default{
     data: function () {
         return {
             numSlots: 64,
@@ -48,4 +48,4 @@ Vue.component('sound-board', {
 
     </div>
 `
-})
+}

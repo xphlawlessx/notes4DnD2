@@ -1,4 +1,4 @@
-Vue.component('left-overlay', {
+export default {
     data: function () {
         return {
             mapName: '',
@@ -35,4 +35,4 @@ Vue.component('left-overlay', {
         <br>
         </span>
     `,
-});
+}
