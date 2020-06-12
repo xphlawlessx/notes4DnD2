@@ -48,6 +48,32 @@ const template = [
                         }
                     }
                 ]
+            }, {
+
+                label: 'View',
+                submenu: [
+                    {
+                        label: 'Init',
+                        accelerator: 'F1',
+                        click: function () {
+                            menuItemClicked('show-init');
+                        }
+                    },
+                    {
+                        label: 'Sound',
+                        accelerator: 'F2',
+                        click: function () {
+                            menuItemClicked('show-sound');
+                        }
+                    },
+                    {
+                        label: 'Canvas',
+                        accelerator: 'F3',
+                        click: function () {
+                            menuItemClicked('show-canvas');
+                        }
+                    }
+                ]
             }
         ]
     }, {
@@ -60,6 +86,28 @@ const template = [
                 accelerator: 'F6',
 
             }
+        ],
+    },
+    {
+
+        label: 'InitShortCuts',
+        submenu: [
+            {
+                label: 'Roll',
+                accelerator: 'Space',
+                click: function () {
+                    menuItemClicked('roll-space');
+                }
+
+            },
+            {
+                label: 'Next',
+                accelerator: 'Return',
+                click: function () {
+                    menuItemClicked('next-return');
+                }
+
+            },
         ],
     }
 ];
@@ -75,6 +123,7 @@ function createWindow() {
     })
     const menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu)
+    win.setMenuBarVisibility(false)
     win.loadFile('index.html').then(() => {
         getIconImages();
     });

@@ -5,6 +5,13 @@ export default {
             noteBodyString: '',
         }
     },
+    methods: {
+        selectSearchText(start, end) {
+            const _text = document.getElementById('text');
+            _text.focus();
+            _text.setSelectionRange(start, end);
+        },
+    },
     template:
             `
         <span class="overlay-content">

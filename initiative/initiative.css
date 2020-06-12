@@ -1,3 +1,24 @@
+:root {
+    --border-size: 1px;
+    --duration: 250ms;
+    --ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+    --font-family: monospace;
+    --color-primary: white;
+    --color-secondary: black;
+    --color-tertiary: dodgerblue;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --space: 4px;
+}
+
+.dieButtons {
+    margin: 15px;
+}
+
+.initParent {
+    margin: 15px;
+    align-content: center;
+}
+
 .overlayL {
     /* Height & width depends on how you want to reveal the overlay (see JS below) */
     height: 100%;
@@ -12,13 +33,37 @@
 }
 
 .initList {
+    border-radius: 25px;
     list-style: none;
-    color: whitesmoke;
+    color: #41403E;
     font-size: 24px;
 }
 
 .highlight {
+    border-radius: 25px;
     background-color: whitesmoke;
-    color: black;
+    color: #41403E;
     outline-color: whitesmoke;
 }
+
+.character-form {
+    border-radius: 25px;
+    color: #41403E;
+    font-size: 24px;
+    outline-color: black;
+    align-content: center;
+}
+
+* {
+    box-sizing: border-box;
+    color: #41403E;
+}
+
+.roundText {
+    border-radius: 25px;
+    text-align: center;
+    color: #41403E;
+}
+
+
+

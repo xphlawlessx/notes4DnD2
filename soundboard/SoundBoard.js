@@ -1,4 +1,4 @@
-export default{
+export default {
     data: function () {
         return {
             numSlots: 64,
@@ -38,14 +38,14 @@ export default{
         },
     },
     template: `
-         <div>
-        <div class="section-loaded">
-            <div v-for="x in numSlots" class="square" @drop.prevent="getFile" @dragend.prevent>
-           
-</div>
+        <div>
+            <div class="section-loaded">
+                <div v-for="x in numSlots" class="square" @drop.prevent="getFile" @dragend.prevent>
+
+                </div>
+
+            </div>
 
         </div>
-
-    </div>
-`
+    `
 }

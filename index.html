@@ -3,27 +3,35 @@
     <title>DnD Suite</title>
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/vue-p5"></script>
-    <link rel="stylesheet" href="style.css" type="text/css"/>
-    <link rel="stylesheet" href="initiative/initiative.css" type="text/css"/>
-    <link rel="stylesheet" href="soundboard/soundboard.css" type="text/css"/>
+    <link href="style.css" rel="stylesheet" type="text/css"/>
+    <link href="initiative/initiative.css" rel="stylesheet" type="text/css"/>
+    <link href="soundboard/soundboard.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<div id="app" @dragover.prevent @drop.prevent>
-    <left-overlay class="overlayL" v-show="showIcons"></left-overlay>
-    <p v-show="showModal" @close="closeForm" id="modal" ref="modal" @keypress.esc="mouseRClick" class="overlayR">
-        <note-overlay></note-overlay>
-    </p>
-    <button @click="showInit = !showInit">{{showInit?'Hide Init':'Show Init'}}</button>
-    <button @click="showSound = !showSound">{{showSound?'Hide Sound':'Show Sound'}}</button>
-    <button @click="showCanvas = !showCanvas">{{showCanvas?'Hide Canvas':'Show Canvas'}}</button>
-    <init-tracker v-show="showInit"></init-tracker>
-    <span @click.right="mouseRClick" @click="mouseLClick">
-    <vue-p5 id="canvas" v-show="showCanvas"
-            v-on="{setup, draw, mousedragged,keypressed, mousereleased, windowresized}"></vue-p5>
-    </span>
-    <sound-board v-show="showSound" v-cloak @drop.prevent="$emit('sound-dropped',(e)=>e)"
-                 @dragover.prevent></sound-board>
+<script defer src="mainVue.js" type="module"></script>
+<div @dragover.prevent @drop.prevent id="app">
+    <section>
+        <last-roll v-bind:last-roll-prop="this.lastRollGlobal||{}"></last-roll>
+        <br>
+        <left-overlay class="overlayL" v-show="showIcons"></left-overlay>
+        <p @close="closeForm" @keypress.esc="mouseRClick" class="overlayR" id="modal" ref="modal" v-show="showModal">
+            <note-overlay ref="note_overlay"></note-overlay>
+        </p>
+        <init-tracker @roll-event="getRoll" v-show="showInit">
+        </init-tracker>
+        <!-- <div v-show="">
+             <input type="text" v-model="searchStr">
+             <button class="lined thick" @click="search">Search</button>
+             <button @click="getNextSearch">Next</button>
+         </div> -->
+
+        <span @click="mouseLClick" @click.right="mouseRClick">
+         <vue-p5 id="canvas" v-on="{setup, draw, mousedragged,keypressed, mousereleased, windowresized}"
+                 v-show="showCanvas"></vue-p5>
+         </span>
+        <sound-board @dragover.prevent @drop.prevent="$emit('sound-dropped',(e)=>e)" v-cloak
+                     v-show="showSound"></sound-board>
+    </section>
 </div>
-<script src="mainVue.js" type="module"></script>
 </body>
 </html>

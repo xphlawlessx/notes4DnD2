@@ -20,7 +20,6 @@ export class Character {
         this.intSave = intSave
         this.chaSave = chaSave
 
-        this.roll = 0;
         this.showStats = false;
         this.rollSets = [];
         this.selected = false;
@@ -30,3 +29,4 @@ export class Character {
         this.roll = roll;
     }
 }
+

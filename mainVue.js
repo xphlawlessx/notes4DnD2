@@ -1,20 +1,21 @@
+import init from "./initiative/InitTracker.js";
+import lRoll from "./initiative/LastRoll.js";
+import sound from "./soundboard/SoundBoard.js";
+import lOverlay from "./notes/left-overlay.js";
+import rOverlay from "./notes/note-overlay.js";
+import {Dungeon, Icon, MapWrapper, Note} from "./notes/data-classes.js"
+
+
 const {ipcRenderer} = require('electron')
-import {default as init} from "./initiative/InitTracker.js";
-import {default as sound} from "./soundboard/SoundBoard.js";
-import {default as lOverlay} from "./notes/left-overlay.js";
-import {default as rOverlay} from "./notes/note-overlay.js";
-import {Note} from "./notes/note.js"
-import {Icon} from "./notes/icon.js"
-import {Dungeon} from "./notes/dungeon.js"
-import {MapWrapper} from "./notes/map.js"
 
 new Vue({
     el: '#app',
     components: {
-        'init-tracker': init,
         'sound-board': sound,
         'left-overlay': lOverlay,
         'note-overlay': rOverlay,
+        'init-tracker': init,
+        'last-roll': lRoll,
     },
     data: {
 
@@ -43,11 +44,20 @@ new Vue({
         selectedDot: Note,
         overDot: false,
         dragging: false,
-        showInit: false,
-        showSound: false,
-        showCanvas: false,
+
+        showInit: false, showSound: false, showCanvas: false,
+        lastRollGlobal: null,
+
+        searchResults: [],
+        searchStr: '',
+        noteIndex: 0,
+        matchIndex: 0,
+        currentMatch: null,
+        isSearching: false,
+
     },
     computed: {
+
         mapName() {
             return this.$children.filter((c) => {
                 return (c.$data.mapName !== undefined)
@@ -72,6 +82,65 @@ new Vue({
     },
 
     methods: {
+        getRoll(e) {
+            this.lastRollGlobal = e;
+        },
+        search() {
+            this.searchResults = []
+            this.dots.forEach((d) => {
+                let _matches = [...d.body.matchAll(this.searchStr.trim())]
+                console.log(_matches)
+                if (_matches.length > 0) {
+                    console.log(d.name)
+                    this.searchResults.push({noteName: d.name, matches: _matches});
+                }
+            });
+            //this.searchResults = this.searchResults.reverse()
+            this.matchIndex = 0;
+            this.noteIndex = 0;
+            console.log("new search")
+            this.currentMatch = this.searchResults[this.noteIndex];
+            console.log(this.currentMatch)
+            this.selectedDot = this.dots.filter(d => d.name === this.currentMatch.noteName).reverse()[0]
+            console.log(this.selectedDot)
+            this.isSearching = true;
+            this.openForm();
+            this.selectSearchText();
+
+        },
+        getNextSearch() {
+            const numNotes = this.searchResults.length - 1;
+            const numMatchesThisNote = this.currentMatch.matches.length - 1;
+            if (this.noteIndex === numNotes && this.matchIndex === numMatchesThisNote) {
+                return;
+            }
+            if (this.matchIndex < numMatchesThisNote) {
+                this.matchIndex++;
+                console.log("next match")
+            }
+            if (this.matchIndex === numMatchesThisNote) {
+                this.noteIndex++;
+                this.matchIndex = 0;
+                console.log("next note")
+            }
+
+            this.currentMatch = this.searchResults[this.noteIndex];
+            this.selectedDot = this.dots.filter(d => d.name === this.currentMatch.noteName)[0]
+
+            console.log(this.currentMatch);
+            console.log(`matchIndex ${this.matchIndex}`)
+            console.log(`noteIndex ${this.noteIndex}`)
+            console.log(`matches len ${this.currentMatch.matches.length}`)
+            console.log(`results len ${this.searchResults.length}`)
+
+            this.openForm();
+            this.selectSearchText();
+
+        },
+        selectSearchText() {
+            this.$refs.note_overlay.selectSearchText(this.currentMatch.matches[this.matchIndex].index, this.currentMatch.matches[this.matchIndex].index + this.currentMatch.matches[this.matchIndex].length);
+        },
+
         setup(sketch) {
             this.sketch = sketch;
             this.bgImage = sketch.loadImage('https://static.tumblr.com/maopbtg/a5emgtoju/inflicted.png');
@@ -121,6 +190,21 @@ new Vue({
                     case 'save-dungeon':
                         this.saveDungeon();
                         break;
+                    case 'show-init':
+                        this.showInit = true
+                        this.showSound = false
+                        this.showCanvas = false
+                        break;
+                    case 'show-sound':
+                        this.showSound = true
+                        this.showInit = false
+                        this.showCanvas = false
+                        break;
+                    case 'show-canvas':
+                        this.showCanvas = true
+                        this.showSound = false
+                        this.showInit = false
+                        break;
                 }
             })
             ipcRenderer.on('icon-paths', (event, args) => {
@@ -156,6 +240,7 @@ new Vue({
             this.selectedDot.body = this.noteBodyString;
             this.selectedDot = null;
             this.showModal = false;
+            this.isSearching = false;
         },
         windowresized(sketch) {
             sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
@@ -198,7 +283,7 @@ new Vue({
                     } else {
                         dot.isSelected = false;
                     }
-                    if (!this.overDot) {
+                    if (!this.overDot && !this.isSearching) {
                         this.selectedDot = null;
                     }
                     dot.show(sketch);

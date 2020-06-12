@@ -23,3 +23,25 @@ export class Note {
     }
 
 }
+
+export class Icon {
+    constructor(name, data) {
+        this.name = name;
+        this.data = data;
+    }
+}
+
+export class MapWrapper {
+    constructor(name, data, notes) {
+        this.name = name;
+        this.data = data;
+        this.notes = notes;
+    }
+}
+
+export class Dungeon {
+    constructor(name = '', maps = []) {
+        this.name = name;
+        this.maps = maps;
+    }
+}

@@ -22,10 +22,10 @@ export class Dice {
         return characters;
     }
 
-    static withAdvantage(character, bonus) {
+    static withAdvantage(bonus) {
         bonus = Number(bonus)
-        const r1 = (Math.floor(Math.random() * 20) + 1) + character.dexBonus;
-        const r2 = (Math.floor(Math.random() * 20) + 1) + character.dexBonus;
+        const r1 = (Math.floor(Math.random() * 20) + 1)
+        const r2 = (Math.floor(Math.random() * 20) + 1)
         let sum = Math.max(r1, r2)
         let display = ''
         if (bonus > 0) {
@@ -38,10 +38,10 @@ export class Dice {
         return {name, sum, display};
     }
 
-    static withDisadvantage(character, bonus) {
+    static withDisadvantage(bonus) {
         bonus = Number(bonus)
-        const r1 = (Math.floor(Math.random() * 20) + 1) + character.dexBonus;
-        const r2 = (Math.floor(Math.random() * 20) + 1) + character.dexBonus;
+        const r1 = (Math.floor(Math.random() * 20) + 1);
+        const r2 = (Math.floor(Math.random() * 20) + 1);
         let sum = Math.min(r1, r2)
         let display = ''
         if (bonus > 0) {
@@ -71,10 +71,16 @@ export class Dice {
 }
 
 export const roll = function (rollSet) {
-    const {d20 = 0, d4 = 0, d6 = 0, d8 = 0, d10 = 0, d12 = 0, d100 = 0, bonus = 0} = rollSet
+    let {d20 = 0, d4 = 0, d6 = 0, d8 = 0, d10 = 0, d12 = 0, d100 = 0, bonus = 0} = rollSet
     let sum = 0;
     let display = ''
     let name = ''
+    if (d4 === 0 && d6 === 0 &&
+        d8 === 0 && d10 === 0 &&
+        d12 === 0 && d20 === 0 &&
+        d100 === 0) {
+        d20 = 1;
+    }
     if (d20 > 0) {
         const d20r = Dice.nDxObject(d20, 20);
         name += ` ${d20r.name}`;
