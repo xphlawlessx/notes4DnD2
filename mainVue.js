@@ -25,9 +25,6 @@ new Vue({
         roomIcons: [],
         mapListParent: null,
 
-        overlayL: null,
-        overlayR: null,
-
         showIcons: false,
         showModal: false,
         xOffset: 0.0,
@@ -45,7 +42,7 @@ new Vue({
         overDot: false,
         dragging: false,
 
-        showInit: false, showSound: false, showCanvas: false,
+        showInit: true, showSound: true, showCanvas: true, showInitList: false, showCharForm: false,
         lastRollGlobal: null,
 
         searchResults: [],
@@ -142,19 +139,22 @@ new Vue({
         },
 
         setup(sketch) {
+            window.addEventListener('keypress', (e) => {
+                if (e.key === ' ') {
+                    e.preventDefault()
+                }
+            })
             this.sketch = sketch;
             this.bgImage = sketch.loadImage('https://static.tumblr.com/maopbtg/a5emgtoju/inflicted.png');
             this.bgImage.loadPixels();
             this.ipcSetup();
             this.loadIcons();
-            let c = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
-            this.baseWidth = sketch.windowWidth;
+            let c = sketch.createCanvas(sketch.windowWidth / 2, sketch.windowHeight);
+            this.baseWidth = sketch.windowWidth / 2;
             this.baseHeight = sketch.windowHeight;
             sketch.textAlign(sketch.CENTER);
             this.mapListParent = document.getElementById('mapListParent');
             this.canvas = document.getElementById('canvas');
-            this.overlayL = document.getElementById("overlayL");
-            this.overlayR = document.getElementById("overlayR");
             this.sketch.textSize(16);
             c.drop(this.gotFile);
             this.sketch.background(this.bgImage);
@@ -191,19 +191,16 @@ new Vue({
                         this.saveDungeon();
                         break;
                     case 'show-init':
-                        this.showInit = true
-                        this.showSound = false
-                        this.showCanvas = false
+                        this.showInitList = !this.showInitList
                         break;
                     case 'show-sound':
-                        this.showSound = true
-                        this.showInit = false
-                        this.showCanvas = false
+                        this.showSound = !this.showSound
                         break;
                     case 'show-canvas':
-                        this.showCanvas = true
-                        this.showSound = false
-                        this.showInit = false
+                        this.showCanvas = !this.showCanvas
+                        break;
+                    case 'show-char':
+                        this.showCharForm = !this.showCharForm
                         break;
                 }
             })
@@ -263,7 +260,6 @@ new Vue({
                 this.sketch.text('drop map image or json file', this.sketch.width / 2, this.sketch.height / 2);
             }
             this.updateDots(sketch);
-            this.overlayL , this.overlayR = this.showIcons ? "30%" : "0%";
 
         },
         updateDots(sketch) {

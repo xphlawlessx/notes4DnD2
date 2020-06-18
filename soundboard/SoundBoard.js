@@ -1,7 +1,7 @@
 export default {
     data: function () {
         return {
-            numSlots: 64,
+            numSlots: 44,
             sounds: [],
         }
     },
@@ -40,7 +40,8 @@ export default {
     template: `
         <div>
             <div class="section-loaded">
-                <div v-for="x in numSlots" class="square" @drop.prevent="getFile" @dragend.prevent>
+                <div v-for="x in numSlots" class="square" @drop.prevent="getFile" @dragend.prevent
+                     style="float: bottom">
 
                 </div>
 

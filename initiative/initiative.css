@@ -12,11 +12,15 @@
 
 .dieButtons {
     margin: 15px;
+    flex: 1 1 auto;
+    flex-direction: row;
 }
 
 .initParent {
-    margin: 15px;
-    align-content: center;
+    flex: 1 1 auto;
+    flex-direction: column;
+    flex-wrap: wrap;
+    text-align: center;
 }
 
 .overlayL {
@@ -37,6 +41,7 @@
     list-style: none;
     color: #41403E;
     font-size: 24px;
+    margin-right: 40px;
 }
 
 .highlight {

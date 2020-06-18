@@ -14,8 +14,9 @@ export default {
                 this.$emit('new-character', new m.Character(
                     this.name, this.dexBonus, this.strBonus,
                     this.wisBonus, this.intBonus, this.chaBonus,
-                    this.dexSave, this.strSave, this.wisSave,
-                    this.intSave, this.chaSave, this.advantageOnInit))
+                    this.advantageOnInit, this.dexSave,
+                    this.strSave, this.wisSave,
+                    this.intSave, this.chaSave))
             });
         }
     },
@@ -83,7 +84,6 @@ export default {
                 </p>
                 <button class="lined thick" @click="save">Save</button>
             </div>
-
         </div>
     `
 }

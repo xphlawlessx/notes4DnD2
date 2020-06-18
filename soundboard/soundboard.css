@@ -5,8 +5,8 @@
     text-align: center;
     display: inline-block;
     position: relative;
-    float: left;
-    border: 2px dotted red;
+    border: dotted 2px #41403E;
+    align-content: center;
     margin: 5px;
 }
 

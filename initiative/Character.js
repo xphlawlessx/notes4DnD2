@@ -19,7 +19,6 @@ export class Character {
         this.wisSave = wisSave
         this.intSave = intSave
         this.chaSave = chaSave
-
         this.showStats = false;
         this.rollSets = [];
         this.selected = false;

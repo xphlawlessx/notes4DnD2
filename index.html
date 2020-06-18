@@ -9,29 +9,27 @@
 </head>
 <body>
 <script defer src="mainVue.js" type="module"></script>
-<div @dragover.prevent @drop.prevent id="app">
-    <section>
-        <last-roll v-bind:last-roll-prop="this.lastRollGlobal||{}"></last-roll>
-        <br>
-        <left-overlay class="overlayL" v-show="showIcons"></left-overlay>
-        <p @close="closeForm" @keypress.esc="mouseRClick" class="overlayR" id="modal" ref="modal" v-show="showModal">
-            <note-overlay ref="note_overlay"></note-overlay>
-        </p>
-        <init-tracker @roll-event="getRoll" v-show="showInit">
-        </init-tracker>
-        <!-- <div v-show="">
-             <input type="text" v-model="searchStr">
-             <button class="lined thick" @click="search">Search</button>
-             <button @click="getNextSearch">Next</button>
-         </div> -->
-
-        <span @click="mouseLClick" @click.right="mouseRClick">
-         <vue-p5 id="canvas" v-on="{setup, draw, mousedragged,keypressed, mousereleased, windowresized}"
+<div @dragover.prevent @drop.prevent id="app"
+     style="width: 100vw;height: 100vh">
+    <last-roll v-bind:last-roll-prop="this.lastRollGlobal||null"></last-roll>
+    <br>
+    <left-overlay class="overlayL" v-show="showIcons"></left-overlay>
+    <p @close="closeForm" @keypress.esc="mouseRClick" class="overlayR" id="modal" ref="modal" v-show="showModal">
+        <note-overlay ref="note_overlay"></note-overlay>
+    </p>
+    <span @click="mouseLClick" @click.right="mouseRClick" style="float: right">
+         <vue-p5 class="canvas" id="canvas" v-on="{setup, draw, mousedragged,keypressed, mousereleased, windowresized}"
                  v-show="showCanvas"></vue-p5>
          </span>
-        <sound-board @dragover.prevent @drop.prevent="$emit('sound-dropped',(e)=>e)" v-cloak
+    <div class="left-flex">
+
+        <init-tracker @roll-event="getRoll" v-show="showInit" class="initTracker"
+                      v-bind:show-char-form="showCharForm"
+                      v-bind:show-init-list="showInitList"></init-tracker>
+
+        <sound-board class="soundBoard" @dragover.prevent @drop.prevent="$emit('sound-dropped',(e)=>e)" v-cloak
                      v-show="showSound"></sound-board>
-    </section>
+    </div>
 </div>
 </body>
 </html>

@@ -1,11 +1,24 @@
-const {app, BrowserWindow, Menu} = require('electron');
+const set = require('./settings/settings.js');
+const {app, BrowserWindow, Menu, screen} = require('electron');
 const fs = require('fs');
-const {readdirSync, statSync} = require('fs')
 const {join} = require('path')
+
 if (require('electron-squirrel-startup')) app.quit()
 const ipc = require('electron').ipcMain;
 app.whenReady().then(createWindow);
 let win;
+let settings;
+const path = './app-settings.json'
+
+if (fs.existsSync(path)) {
+    let rawdata = fs.readFileSync(path);
+    settings = JSON.parse(rawdata);
+} else {
+    settings = new set.Settings()
+}
+saveSettings()
+
+
 const template = [
     {
         label: 'File',
@@ -48,33 +61,8 @@ const template = [
                         }
                     }
                 ]
-            }, {
+            },
 
-                label: 'View',
-                submenu: [
-                    {
-                        label: 'Init',
-                        accelerator: 'F1',
-                        click: function () {
-                            menuItemClicked('show-init');
-                        }
-                    },
-                    {
-                        label: 'Sound',
-                        accelerator: 'F2',
-                        click: function () {
-                            menuItemClicked('show-sound');
-                        }
-                    },
-                    {
-                        label: 'Canvas',
-                        accelerator: 'F3',
-                        click: function () {
-                            menuItemClicked('show-canvas');
-                        }
-                    }
-                ]
-            }
         ]
     }, {
 
@@ -94,7 +82,7 @@ const template = [
         submenu: [
             {
                 label: 'Roll',
-                accelerator: 'Space',
+                accelerator: settings.roll,
                 click: function () {
                     menuItemClicked('roll-space');
                 }
@@ -102,33 +90,200 @@ const template = [
             },
             {
                 label: 'Next',
-                accelerator: 'Return',
+                accelerator: settings.next,
                 click: function () {
                     menuItemClicked('next-return');
                 }
 
             },
         ],
+    },
+    {
+        label: 'show/hide',
+        submenu: [
+            {
+                label: 'Initiative',
+                accelerator: settings.showInit,
+                click: function () {
+                    menuItemClicked('show-init');
+                }
+
+            },
+            {
+                label: 'Character form',
+                accelerator: settings.showChar,
+                click: function () {
+                    menuItemClicked('show-char');
+                }
+
+            },
+            {
+                label: 'Soundboard',
+                accelerator: settings.showSound,
+                click: function () {
+                    menuItemClicked('show-sound');
+                }
+
+            },
+            {
+                label: 'Canvas',
+                accelerator: settings.showCanvas,
+                click: function () {
+                    menuItemClicked('show-canvas');
+                }
+            },
+            {
+                label: 'Bonus',
+                accelerator: settings.incrementBonus,
+                click: function () {
+                    menuItemClicked('inc-bonus');
+                }
+            },
+        ],
+    },
+    {
+        label: 'roll',
+        submenu: [
+            {
+                label: 'd4+',
+                accelerator: settings.d4p,
+                click: function () {
+                    menuItemClicked('d4-plus');
+                }
+
+            },
+            {
+                label: 'd6+',
+                accelerator: settings.d6p,
+                click: function () {
+                    menuItemClicked('d6-plus');
+                }
+
+            },
+            {
+                label: 'd8+',
+                accelerator: settings.d8p,
+                click: function () {
+                    menuItemClicked('d8-plus');
+                }
+
+            },
+            {
+                label: 'd10+',
+                accelerator: settings.d10p,
+                click: function () {
+                    menuItemClicked('d10-plus');
+                }
+
+            },
+            {
+                label: 'd12+',
+                accelerator: settings.d12p,
+                click: function () {
+                    menuItemClicked('d12-plus');
+                }
+
+            },
+            {
+                label: 'd20+',
+                accelerator: settings.d20p,
+                click: function () {
+                    menuItemClicked('d20-plus');
+                }
+
+            }, {
+                label: 'd100+',
+                accelerator: settings.d100p,
+                click: function () {
+                    menuItemClicked('d100-plus');
+                }
+
+            },
+            {
+                label: 'd4-',
+                accelerator: settings.d4r,
+                click: function () {
+                    menuItemClicked('d4-roll');
+                }
+
+            },
+            {
+                label: 'd6-',
+                accelerator: settings.d6r,
+                click: function () {
+                    menuItemClicked('d6-roll');
+                }
+
+            },
+            {
+                label: 'd8-',
+                accelerator: settings.d8r,
+                click: function () {
+                    menuItemClicked('d8-roll');
+                }
+
+            },
+            {
+                label: 'd10-',
+                accelerator: settings.d10r,
+                click: function () {
+                    menuItemClicked('d10-roll');
+                }
+
+            },
+            {
+                label: 'd12-',
+                accelerator: settings.d12r,
+                click: function () {
+                    menuItemClicked('d12-roll');
+                }
+
+            },
+            {
+                label: 'd20-',
+                accelerator: settings.d20r,
+                click: function () {
+                    menuItemClicked('d20-roll');
+                }
+
+            }, {
+                label: 'd100-',
+                accelerator: settings.d100r,
+                click: function () {
+                    menuItemClicked('d100-roll');
+                }
+
+            },
+
+        ],
     }
 ];
 
 function createWindow() {
+
     // Create the browser window.
+    const {width, height} = screen.getPrimaryDisplay().workAreaSize
     win = new BrowserWindow({
-        width: 800,
-        height: 675,
+        width: width,
+        height: height,
         webPreferences: {
             nodeIntegration: true
         },
     })
     const menu = Menu.buildFromTemplate(template)
-    Menu.setApplicationMenu(menu)
     win.setMenuBarVisibility(false)
+    Menu.setApplicationMenu(menu)
     win.loadFile('index.html').then(() => {
+        win.webContents.send("settings", settings);
         getIconImages();
+
     });
 }
 
+function saveSettings() {
+    const _set = JSON.stringify(settings)
+    fs.writeFileSync(path, _set)
+}
 
 function saveDungeon(dungeonName, data) {
     let jsonMap = JSON.stringify(data)

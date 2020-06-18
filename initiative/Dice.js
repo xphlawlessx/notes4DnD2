@@ -124,7 +124,7 @@ export const roll = function (rollSet) {
         sum += d100r.sum;
     }
     if (bonus > 0) {
-
+        sum += bonus
         name += ` + ${bonus}`
         display += ` + ${bonus}`
     }
@@ -142,6 +142,10 @@ export class RollSet {
         this.d100 = d100
         this.bonus = bonus
         this.name = ''
+    }
+
+    notEmpty() {
+        return Object.keys(this).map(key => this[key]).reduce((v, t) => !isNaN(parseInt(v)) ? v + t : t) > 0
     }
 }
 
